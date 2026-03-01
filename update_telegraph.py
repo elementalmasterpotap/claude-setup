@@ -393,6 +393,7 @@ TG_TEXT = (
     '<a href="https://github.com/elementalmasterpotap/potap-claude-setup">GitHub →</a>'
     "  ·  "
     f'<a href="{LONGREAD_URL}">Лонгрид →</a>'
+    f"\n\n<i>обновлено {ts}</i>"
 )
 
 def _tg_api(method, payload):
