@@ -31,6 +31,17 @@ content = [
         "Накопил приличный стек правил, памяти и плагинов для Claude Code. "
         "Разбираю как всё это устроено — только механика, без воды."
     ]},
+
+    # ── Оглавление ───────────────────────────────────────────────
+    {"tag": "pre", "children": [
+        "├─ settings.json ─────── фундамент, разрешения, токены\n"
+        "├─ CLAUDE.md ─────────── алгоритм сессии, маршрутизатор\n"
+        "├─ MEMORY.md ─────────── долговременная память\n"
+        "├─ hookify ───────────── block/warn хуки\n"
+        "├─ rules/ ────────────── 8 модульных md-правил\n"
+        "├─ Проектный CLAUDE.md ─ контекст репо\n"
+        "└─ GitHub + Telegraph ── инфраструктура автообновления"
+    ]},
     {"tag": "hr"},
 
     # ── 1. settings.json ─────────────────────────────────────────
@@ -45,7 +56,7 @@ content = [
         "│   ├── allow       → [Bash(*), Edit(*), Write(*), Read(*), WebSearch, WebFetch(*)]\n"
         "│   └── defaultMode → dontAsk  (работает автономно, не спрашивает каждый раз)\n"
         "├── enabledPlugins  → [commit-commands, claude-md-management, hookify, github]\n"
-        "├── env             → {GITHUB_TOKEN, TELEGRAPH_TOKEN}  (токены глобально)\n"
+        "├── env             → {GITHUB_TOKEN, TELEGRAPH_TOKEN, TELEGRAM_BOT_TOKEN}\n"
         "└── language        → Russian"
     ]},
     {"tag": "p", "children": [
@@ -100,48 +111,7 @@ content = [
     ]},
     {"tag": "hr"},
 
-    # ── 3. Модульные md-файлы ─────────────────────────────────────
-    {"tag": "h3", "children": ["rules/ — модульные md-файлы"]},
-    {"tag": "p", "children": [
-        "CLAUDE.md держится коротким (<150 строк). Детали выносятся в модули ",
-        {"tag": "code", "children": ["~/.claude/rules/"]},
-        ". Claude читает нужный только когда задача попадает в его домен."
-    ]},
-    {"tag": "pre", "children": [
-        "~/.claude/rules/\n"
-        "├── communication.md         стиль/тон/мемы — БЛОКЕР, читать до первого ответа\n"
-        "├── workflow_universal.md    патч → деплой → патчнот → коммит\n"
-        "├── github_ops.md            GitHub API через PowerShell без gh CLI\n"
-        "├── github_formatting.md     README, бейджи, topics, чеклист репо\n"
-        "├── telegraph.md             публикация на Telegraph, editPage\n"
-        "├── windows_dev.md           PS installer, C# WinForms тёмная тема\n"
-        "├── vibe_coding.md           вайбкодинг — концепция и маппинг\n"
-        "└── lessons_universal.md     ловушки: PS / C# / Telegram / GitHub"
-    ]},
-    {"tag": "p", "children": [
-        {"tag": "b", "children": ["communication.md"]},
-        " — единственный модуль с флагом БЛОКЕР. Без него Claude не знает как разговаривать: "
-        "стиль, тон, отсылки, мемы. Читается первым делом в каждой сессии."
-    ]},
-    {"tag": "p", "children": [
-        {"tag": "b", "children": ["github_ops.md"]},
-        " — весь GitHub через PowerShell + Invoke-RestMethod. Ни одного gh CLI. "
-        "Создание репо, релизы, загрузка ассетов, кириллица через \\uXXXX."
-    ]},
-    {"tag": "p", "children": [
-        {"tag": "b", "children": ["lessons_universal.md"]},
-        " — накопленные ловушки из практики: PS ConvertTo-Json двойное экранирование, "
-        "csc.exe C# 5 ограничения, Telegram Bot API лимиты, GitHub upload endpoint."
-    ]},
-    {"tag": "p", "children": [
-        {"tag": "b", "children": ["vibe_coding.md"]},
-        " — концепция: говоришь на человеческом языке что хочешь увидеть, "
-        "Claude находит нужные параметры и меняет, ты смотришь результат. "
-        "Шаблон-заготовка для любого проекта с настраиваемым выходом."
-    ]},
-    {"tag": "hr"},
-
-    # ── 4. MEMORY.md ──────────────────────────────────────────────
+    # ── 3. MEMORY.md ──────────────────────────────────────────────
     {"tag": "h3", "children": ["MEMORY.md — долговременная память"]},
     {"tag": "p", "children": [
         "Claude Code не запоминает ничего между сессиями. MEMORY.md — решение: "
@@ -166,7 +136,7 @@ content = [
     ]},
     {"tag": "hr"},
 
-    # ── 5. hookify ────────────────────────────────────────────────
+    # ── 4. hookify ────────────────────────────────────────────────
     {"tag": "h3", "children": ["hookify — система хуков"]},
     {"tag": "p", "children": [
         "Плагин hookify добавляет точки перехвата до/после действий Claude. "
@@ -216,6 +186,47 @@ content = [
     ]},
     {"tag": "hr"},
 
+    # ── 5. Модульные md-файлы ─────────────────────────────────────
+    {"tag": "h3", "children": ["rules/ — модульные md-файлы"]},
+    {"tag": "p", "children": [
+        "CLAUDE.md держится коротким (<150 строк). Детали выносятся в модули ",
+        {"tag": "code", "children": ["~/.claude/rules/"]},
+        ". Claude читает нужный только когда задача попадает в его домен."
+    ]},
+    {"tag": "pre", "children": [
+        "~/.claude/rules/\n"
+        "├── communication.md         стиль/тон/мемы — БЛОКЕР, читать до первого ответа\n"
+        "├── workflow_universal.md    патч → деплой → патчнот → коммит\n"
+        "├── github_ops.md            GitHub API через PowerShell без gh CLI\n"
+        "├── github_formatting.md     README, бейджи, topics, чеклист репо\n"
+        "├── telegraph.md             публикация на Telegraph, editPage\n"
+        "├── windows_dev.md           PS installer, C# WinForms тёмная тема\n"
+        "├── vibe_coding.md           вайбкодинг — концепция и маппинг\n"
+        "└── lessons_universal.md     ловушки: PS / C# / Telegram / GitHub"
+    ]},
+    {"tag": "p", "children": [
+        {"tag": "b", "children": ["communication.md"]},
+        " — единственный модуль с флагом БЛОКЕР. Без него Claude не знает как разговаривать: "
+        "стиль, тон, отсылки, мемы. Читается первым делом в каждой сессии."
+    ]},
+    {"tag": "p", "children": [
+        {"tag": "b", "children": ["github_ops.md"]},
+        " — весь GitHub через PowerShell + Invoke-RestMethod. Ни одного gh CLI. "
+        "Создание репо, релизы, загрузка ассетов, кириллица через \\uXXXX."
+    ]},
+    {"tag": "p", "children": [
+        {"tag": "b", "children": ["lessons_universal.md"]},
+        " — накопленные ловушки из практики: PS ConvertTo-Json двойное экранирование, "
+        "csc.exe C# 5 ограничения, Telegram Bot API лимиты, GitHub upload endpoint."
+    ]},
+    {"tag": "p", "children": [
+        {"tag": "b", "children": ["vibe_coding.md"]},
+        " — концепция: говоришь на человеческом языке что хочешь увидеть, "
+        "Claude находит нужные параметры и меняет, ты смотришь результат. "
+        "Шаблон-заготовка для любого проекта с настраиваемым выходом."
+    ]},
+    {"tag": "hr"},
+
     # ── 6. Проектный CLAUDE.md ────────────────────────────────────
     {"tag": "h3", "children": ["Проектный CLAUDE.md — контекст репо"]},
     {"tag": "p", "children": [
@@ -238,37 +249,10 @@ content = [
     ]},
     {"tag": "hr"},
 
-    # ── 7. Telegraph ─────────────────────────────────────────────
-    {"tag": "h3", "children": ["Telegraph — этот лонгрид как часть системы"]},
+    # ── 7. GitHub + Telegraph ─────────────────────────────────────
+    {"tag": "h3", "children": ["GitHub + Telegraph — инфраструктура автообновления"]},
     {"tag": "p", "children": [
-        "Telegraph нужен для длинных публикаций с форматированием. "
-        "Telegram Bot API обрезает на 4096 символах, Telegraph — нет."
-    ]},
-    {"tag": "pre", "children": [
-        "Интеграция:\n"
-        "  settings.json                 → env.TELEGRAPH_TOKEN (доступен везде)\n"
-        "  ~/.claude/rules/telegraph.md  → правила публикации, API, шаблоны нод\n"
-        "  ~/.claude/update_telegraph.py → единый файл: Telegraph + GitHub + Telegram"
-    ]},
-    {"tag": "p", "children": [
-        "Публикация только через Python (curl ломает кириллицу). "
-        "Для ", {"tag": "code", "children": ["editPage"]}, " — тот же подход."
-    ]},
-    {"tag": "p", "children": [
-        "Один запуск ", {"tag": "code", "children": ["update_telegraph.py"]}, " делает три вещи:"
-    ]},
-    {"tag": "pre", "children": [
-        "python3 ~/.claude/update_telegraph.py\n"
-        "  ├── editPage   → Telegraph (контент + дата)\n"
-        "  ├── git push   → GitHub (rules/, CLAUDE.md, templates/)\n"
-        "  └── editMessage → Telegram-пост (рефетч превью + дата)"
-    ]},
-    {"tag": "hr"},
-
-    # ── GitHub ────────────────────────────────────────────────────
-    {"tag": "h3", "children": ["GitHub"]},
-    {"tag": "p", "children": [
-        "Вся система — правила, шаблоны, hookify-хуки, скрипт обновления этого лонгрида — лежит на GitHub:"
+        "Вся система лежит на GitHub и обновляется автоматически при каждом изменении кастомизаций:"
     ]},
     {"tag": "p", "children": [{"tag": "a",
         "href": "https://github.com/elementalmasterpotap/potap-claude-setup",
@@ -279,17 +263,20 @@ content = [
         "├── CLAUDE.md                  глобальный алгоритм сессии\n"
         "├── update_telegraph.py        скрипт обновления этого лонгрида\n"
         "├── rules/                     8 модульных md-файлов\n"
-        "│   ├── communication.md\n"
-        "│   ├── github_ops.md\n"
-        "│   ├── github_formatting.md\n"
-        "│   ├── telegraph.md\n"
-        "│   ├── workflow_universal.md\n"
-        "│   ├── windows_dev.md\n"
-        "│   ├── vibe_coding.md\n"
-        "│   └── lessons_universal.md\n"
         "└── templates/\n"
         "    ├── CLAUDE_BASE.md  MEMORY_TEMPLATE.md  и др.\n"
         "    └── hookify/        6 шаблонов хуков"
+    ]},
+    {"tag": "p", "children": [
+        "Telegraph нужен для длинных публикаций с форматированием — "
+        "Telegram Bot API обрезает на 4096 символах, Telegraph нет. "
+        "Один запуск ", {"tag": "code", "children": ["update_telegraph.py"]}, " делает три вещи:"
+    ]},
+    {"tag": "pre", "children": [
+        "python3 ~/.claude/update_telegraph.py\n"
+        "  ├── editPage    → Telegraph (контент + дата)\n"
+        "  ├── git push    → GitHub (rules/, CLAUDE.md, templates/)\n"
+        "  └── editMessage → Telegram-пост (рефетч превью + дата)"
     ]},
     {"tag": "hr"},
 
@@ -300,8 +287,9 @@ content = [
         "────────────────────────────────────────────────────────────────────\n"
         "Фундамент              settings.json                  разрешения, плагины, токены\n"
         "Мозг сессии            ~/.claude/CLAUDE.md            алгоритм, принципы, маршрутизатор\n"
-        "Стиль / тон            rules/communication.md         как разговаривать\n"
         "Память                 memory/MEMORY.md               факты между сессиями\n"
+        "Enforcement            hookify.*.local.md             block/warn хуки\n"
+        "Стиль / тон            rules/communication.md         как разговаривать\n"
         "GitHub без gh CLI      rules/github_ops.md            API через PowerShell\n"
         "GitHub оформление      rules/github_formatting.md     README, бейджи, чеклист\n"
         "Telegram посты         rules/lessons_universal.md     TG-лимиты, Bot API\n"
@@ -309,7 +297,6 @@ content = [
         "Windows / C# / PS      rules/windows_dev.md           installer, WinForms\n"
         "Вайбкодинг             rules/vibe_coding.md           человеческий язык → параметры\n"
         "Ловушки / антипат.     rules/lessons_universal.md     баги из практики\n"
-        "Enforcement            hookify.*.local.md             block/warn хуки\n"
         "Проектный контекст     .claude/CLAUDE.md              специфика репо"
     ]},
     {"tag": "p", "children": [
