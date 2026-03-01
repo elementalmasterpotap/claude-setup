@@ -406,7 +406,7 @@ def _tg_api(method, payload):
 def _refresh_tg_post():
     if not TG_BOT:
         return
-    lp = {"url": LONGREAD_URL, "prefer_large_media": True}
+    lp = {"url": LONGREAD_URL}
     post_id = open(TG_POST_FILE).read().strip() if os.path.exists(TG_POST_FILE) else None
     if post_id:
         r = _tg_api("editMessageText", {
