@@ -65,8 +65,14 @@ content = [
         "│   ├── SessionStart [compact] → head CLAUDE.md  (реинжект после компакции)\n"
         "│   ├── PreCompact   [auto]    → precompact-backup.sh  (бэкап транскрипта)\n"
         "│   ├── TaskCompleted          → task-gate.sh  (блок если staged не закоммичен)\n"
-        "│   ├── Stop                   → anti-ration.py  (блок отмазок)\n"
-        "│   └── Stop                   → pseudo-check.py  (блок 4+ пунктов без псевдографики)\n"
+        "│   ├── Stop [1] → anti-ration.py      блок отмазок (за рамками / нужен контекст)\n"
+        "│   ├── Stop [2] → pseudo-check.py     блок 4+ пунктов без псевдографики\n"
+        "│   ├── Stop [3] → commit-check.py     блок коммита без type(scope) + Co-Authored\n"
+        "│   ├── Stop [4] → token-leak-check.py блок реальных токенов в ответе\n"
+        "│   ├── Stop [5] → tone-check.py       блок корпоративного тона / подобострастия\n"
+        "│   ├── Stop [6] → deploy-check.py     warn деплоя без -NoPrompt / --yes\n"
+        "│   ├── Stop [7] → ps-unicode-check.py блок PS JSON + кириллица в двойных кавычках\n"
+        "│   └── Stop [8] → patchnote-check.py  блок патчнота без tagline / не от первого лица\n"
         "├── enabledPlugins  → [commit-commands, claude-md-management, hookify, github]\n"
         "└── env             → {GITHUB_TOKEN, TELEGRAPH_TOKEN, TELEGRAM_BOT_TOKEN}"
     ]},
@@ -81,10 +87,18 @@ content = [
         "Решает галлюцинации по API — Claude видит реальные сигнатуры, а не придумывает их."
     ]},
     {"tag": "p", "children": [
-        {"tag": "b", "children": ["Stop hook / anti-rationalization"]},
-        " — каждый раз когда Claude заканчивает ответ, скрипт проверяет текст на отмазки: "
-        "«за рамками задачи», «нужно больше контекста», «баг существовал до меня». "
-        "Если нашёл — блокирует завершение и заставляет продолжать работу."
+        {"tag": "b", "children": ["Stop hooks (8 штук)"]},
+        " — каждый раз когда Claude заканчивает ответ, все 8 скриптов проверяют текст:"
+    ]},
+    {"tag": "pre", "children": [
+        "anti-ration.py      → блок отмазок «за рамками», «нужно контекст», «баг до меня»\n"
+        "pseudo-check.py     → блок 4+ пунктов списка без псевдографики\n"
+        "commit-check.py     → блок коммита без type(scope): + Co-Authored-By\n"
+        "token-leak-check.py → блок если в ответе реальный ghp_ / TG / Telegraph токен\n"
+        "tone-check.py       → блок корпоративного тона и ассистент-подобострастия\n"
+        "deploy-check.py     → warn если деплой-команда без -NoPrompt / --yes\n"
+        "ps-unicode-check.py → блок PowerShell JSON + кириллица в двойных кавычках\n"
+        "patchnote-check.py  → блок патчнота без tagline в курсиве / не от первого лица"
     ]},
     {"tag": "p", "children": [
         "Токены в ", {"tag": "code", "children": ["env"]},
@@ -343,7 +357,13 @@ content = [
         "Мозг сессии            ~/.claude/CLAUDE.md              алгоритм, принципы, маршрутизатор\n"
         "Память                 memory/MEMORY.md                 факты между сессиями\n"
         "Безопасность           deny rules + Stop hook           кредсы недоступны, отмазки блокируются\n"
-        "Псевдографика          pseudo-check.py + communication  Stop блок 4+ списков, дефолт везде\n"
+        "Псевдографика          pseudo-check.py + communication  блок 4+ списков, дефолт везде\n"
+        "Коммит-формат          commit-check.py                  type(scope) + Co-Authored обязательны\n"
+        "Токены в ответе        token-leak-check.py              блок реальных секретов в тексте\n"
+        "Тон общения            tone-check.py                    блок канцелярита и подобострастия\n"
+        "Деплой флаги           deploy-check.py                  warn без -NoPrompt / --yes\n"
+        "PS Unicode             ps-unicode-check.py              блок JSON + кириллица в двойных кавычках\n"
+        "Патчнот формат         patchnote-check.py               tagline + первое лицо обязательны\n"
         "Живая документация     mcpServers.context7              актуальные API без галлюцинаций\n"
         "Ревью кода             agents/code-reviewer.md          haiku, только чтение, быстро\n"
         "HLSL диагностика       agents/shader-expert.md          анализ шейдера, детектор, бюджет\n"
