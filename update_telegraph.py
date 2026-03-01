@@ -65,7 +65,8 @@ content = [
         "│   ├── SessionStart [compact] → head CLAUDE.md  (реинжект после компакции)\n"
         "│   ├── PreCompact   [auto]    → precompact-backup.sh  (бэкап транскрипта)\n"
         "│   ├── TaskCompleted          → task-gate.sh  (блок если staged не закоммичен)\n"
-        "│   └── Stop                   → anti-ration.py  (блок отмазок)\n"
+        "│   ├── Stop                   → anti-ration.py  (блок отмазок)\n"
+        "│   └── Stop                   → pseudo-check.py  (блок 4+ пунктов без псевдографики)\n"
         "├── enabledPlugins  → [commit-commands, claude-md-management, hookify, github]\n"
         "└── env             → {GITHUB_TOKEN, TELEGRAPH_TOKEN, TELEGRAM_BOT_TOKEN}"
     ]},
@@ -226,7 +227,9 @@ content = [
     {"tag": "p", "children": [
         {"tag": "b", "children": ["communication.md"]},
         " — единственный модуль с флагом БЛОКЕР. Без него Claude не знает как разговаривать: "
-        "стиль, тон, отсылки, мемы. Читается первым делом в каждой сессии."
+        "стиль, тон, отсылки, мемы. Читается первым делом в каждой сессии. "
+        "Псевдографика (таблицы, ASCII-деревья, box-drawing) — дефолтный режим: "
+        "любое перечисление 4+ пунктов → таблица/дерево. Stop hook pseudo-check.py блокирует нарушения."
     ]},
     {"tag": "p", "children": [
         {"tag": "b", "children": ["github_ops.md"]},
@@ -340,6 +343,7 @@ content = [
         "Мозг сессии            ~/.claude/CLAUDE.md              алгоритм, принципы, маршрутизатор\n"
         "Память                 memory/MEMORY.md                 факты между сессиями\n"
         "Безопасность           deny rules + Stop hook           кредсы недоступны, отмазки блокируются\n"
+        "Псевдографика          pseudo-check.py + communication  Stop блок 4+ списков, дефолт везде\n"
         "Живая документация     mcpServers.context7              актуальные API без галлюцинаций\n"
         "Ревью кода             agents/code-reviewer.md          haiku, только чтение, быстро\n"
         "HLSL диагностика       agents/shader-expert.md          анализ шейдера, детектор, бюджет\n"
