@@ -268,8 +268,8 @@ content = [
         "Вся система — правила, шаблоны, hookify-хуки, скрипт обновления этого лонгрида — лежит на GitHub:"
     ]},
     {"tag": "p", "children": [{"tag": "a",
-        "href": "https://github.com/elementalmasterpotap/claude-setup",
-        "children": ["github.com/elementalmasterpotap/claude-setup"]
+        "href": "https://github.com/elementalmasterpotap/klpotap-claude-setup",
+        "children": ["github.com/elementalmasterpotap/klpotap-claude-setup"]
     }]},
     {"tag": "pre", "children": [
         "claude-setup/\n"
@@ -362,7 +362,7 @@ def _sync_github():
             shutil.copy(os.path.join(hk, f), os.path.join(REPO, "templates", "hookify", f))
 
     token = os.environ.get("GITHUB_PERSONAL_ACCESS_TOKEN", "")
-    repo_url = f"https://{token}@github.com/elementalmasterpotap/claude-setup.git"
+    repo_url = f"https://{token}@github.com/elementalmasterpotap/klpotap-claude-setup.git"
     subprocess.run(["git", "-C", REPO, "remote", "set-url", "origin", repo_url], capture_output=True)
     subprocess.run(["git", "-C", REPO, "add", "."], capture_output=True)
     diff = subprocess.run(["git", "-C", REPO, "diff", "--cached", "--quiet"])
@@ -370,7 +370,7 @@ def _sync_github():
         subprocess.run(["git", "-C", REPO, "commit", "-m", f"chore: sync — {ts}"], capture_output=True, check=True)
         subprocess.run(["git", "-C", REPO, "push"], capture_output=True, check=True)
         subprocess.run(["git", "-C", REPO, "remote", "set-url", "origin",
-                        "https://github.com/elementalmasterpotap/claude-setup.git"], capture_output=True)
+                        "https://github.com/elementalmasterpotap/klpotap-claude-setup.git"], capture_output=True)
         print(f"GitHub synced ({ts})")
     else:
         print("GitHub: no changes")
