@@ -1,0 +1,21 @@
+# Secrets
+.env
+*.token
+.telegraph_token
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+
+# Claude local
+.claude/settings.local.json
