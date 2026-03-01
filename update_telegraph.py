@@ -1,0 +1,296 @@
+"""
+Обновление лонгрида про кастомизации Claude.
+Единственный файл — всегда editPage, не пересоздавать.
+Путь: Kak-ya-kastomiziruyu-Claude-pravila-pamyat-i-moduli-03-01
+"""
+import urllib.request, json, os, sys
+
+TOKEN = os.environ.get("TELEGRAPH_TOKEN")
+if not TOKEN:
+    print("Error: TELEGRAPH_TOKEN not set", file=sys.stderr); sys.exit(1)
+PATH  = "Kak-ya-kastomiziruyu-Claude-pravila-pamyat-i-moduli-03-01"
+
+content = [
+    # ── Предисловие ──────────────────────────────────────────────
+    {"tag": "p", "children": [{"tag": "i", "children": [
+        "Лонгрид обновляется автоматически — каждый раз когда я добавляю или убираю кастомизацию, "
+        "Claude редактирует эту страницу. То что здесь написано = актуальное состояние системы."
+    ]}]},
+    {"tag": "p", "children": [
+        "Накопил приличный стек правил, памяти и плагинов для Claude Code. "
+        "Разбираю как всё это устроено — только механика, без воды."
+    ]},
+    {"tag": "hr"},
+
+    # ── 1. settings.json ─────────────────────────────────────────
+    {"tag": "h3", "children": ["settings.json — фундамент"]},
+    {"tag": "p", "children": [
+        "Глобальный конфиг Claude Code. Живёт в ", {"tag": "code", "children": ["~/.claude/settings.json"]},
+        ". Определяет что Claude может делать без запроса и что у него подключено."
+    ]},
+    {"tag": "pre", "children": [
+        "settings.json\n"
+        "├── permissions\n"
+        "│   ├── allow       → [Bash(*), Edit(*), Write(*), Read(*), WebSearch, WebFetch(*)]\n"
+        "│   └── defaultMode → dontAsk  (работает автономно, не спрашивает каждый раз)\n"
+        "├── enabledPlugins  → [commit-commands, claude-md-management, hookify, github]\n"
+        "├── env             → {GITHUB_TOKEN, TELEGRAPH_TOKEN}  (токены глобально)\n"
+        "└── language        → Russian"
+    ]},
+    {"tag": "p", "children": [
+        {"tag": "b", "children": ["Главное"]}, " — ",
+        {"tag": "code", "children": ["defaultMode: dontAsk"]},
+        ". Claude не просит разрешения на каждый вызов инструмента. "
+        "Работает сам, только для критичных необратимых действий уточняет."
+    ]},
+    {"tag": "p", "children": [
+        "Токены в ", {"tag": "code", "children": ["env"]},
+        " — Claude видит их как переменные окружения в любом проекте. "
+        "Не нужно вставлять в каждый скрипт вручную."
+    ]},
+    {"tag": "hr"},
+
+    # ── 2. CLAUDE.md глобальный ───────────────────────────────────
+    {"tag": "h3", "children": ["CLAUDE.md — алгоритм сессии"]},
+    {"tag": "p", "children": [
+        "Глобальный ", {"tag": "code", "children": ["~/.claude/CLAUDE.md"]},
+        " — главный файл инструкций. Загружается в каждую сессию."
+    ]},
+    {"tag": "p", "children": [
+        "Главная часть — маршрутизатор: каждый тип задачи направляет Claude к нужному модулю."
+    ]},
+    {"tag": "pre", "children": [
+        "ЗАДАЧА ПОЛУЧЕНА:\n"
+        "  ├── разговор / вопрос       → отвечать напрямую\n"
+        "  ├── GitHub / релиз / API    → github_ops.md\n"
+        "  ├── GitHub оформление       → github_formatting.md\n"
+        "  ├── Telegram / бот / пост   → lessons_universal.md\n"
+        "  ├── Telegraph / статья      → telegraph.md\n"
+        "  ├── деплой / патчнот        → workflow_universal.md\n"
+        "  ├── Windows / C# / PS       → lessons_universal.md + windows_dev.md\n"
+        "  ├── вайбкодинг              → vibe_coding.md\n"
+        "  ├── правило / память        → карта владения → проверить дубли\n"
+        "  └── новый проект            → templates/CLAUDE_BASE.md"
+    ]},
+    {"tag": "p", "children": ["После задачи — автоматические действия:"]},
+    {"tag": "pre", "children": [
+        "ПОСЛЕ ЗАДАЧИ:\n"
+        "  поломка / урок?                    → lessons.md\n"
+        "  новый паттерн?                     → MEMORY.md\n"
+        "  визуальное изменение?              → PATCHNOTES.md\n"
+        "  добавлена/удалена кастомизация?    → ~/.claude/update_telegraph.py\n"
+        "  новое правило?                     → карта владения → проверить дубли\n"
+        "  изменён CLAUDE/MEMORY?             → синхронизировать копии\n"
+        "  готово?                            → доказать что работает"
+    ]},
+    {"tag": "p", "children": [
+        "Ещё там: принципы (минимальный импакт, root cause не симптом, не хакать), "
+        "правила коммитов, аудит правил, карта владения — что в каком файле хранится."
+    ]},
+    {"tag": "hr"},
+
+    # ── 3. Модульные md-файлы ─────────────────────────────────────
+    {"tag": "h3", "children": ["rules/ — модульные md-файлы"]},
+    {"tag": "p", "children": [
+        "CLAUDE.md держится коротким (<150 строк). Детали выносятся в модули ",
+        {"tag": "code", "children": ["~/.claude/rules/"]},
+        ". Claude читает нужный только когда задача попадает в его домен."
+    ]},
+    {"tag": "pre", "children": [
+        "~/.claude/rules/\n"
+        "├── communication.md         стиль/тон/мемы — БЛОКЕР, читать до первого ответа\n"
+        "├── workflow_universal.md    патч → деплой → патчнот → коммит\n"
+        "├── github_ops.md            GitHub API через PowerShell без gh CLI\n"
+        "├── github_formatting.md     README, бейджи, topics, чеклист репо\n"
+        "├── telegraph.md             публикация на Telegraph, editPage\n"
+        "├── windows_dev.md           PS installer, C# WinForms тёмная тема\n"
+        "├── vibe_coding.md           вайбкодинг — концепция и маппинг\n"
+        "└── lessons_universal.md     ловушки: PS / C# / Telegram / GitHub"
+    ]},
+    {"tag": "p", "children": [
+        {"tag": "b", "children": ["communication.md"]},
+        " — единственный модуль с флагом БЛОКЕР. Без него Claude не знает как разговаривать: "
+        "стиль, тон, отсылки, мемы. Читается первым делом в каждой сессии."
+    ]},
+    {"tag": "p", "children": [
+        {"tag": "b", "children": ["github_ops.md"]},
+        " — весь GitHub через PowerShell + Invoke-RestMethod. Ни одного gh CLI. "
+        "Создание репо, релизы, загрузка ассетов, кириллица через \\uXXXX."
+    ]},
+    {"tag": "p", "children": [
+        {"tag": "b", "children": ["lessons_universal.md"]},
+        " — накопленные ловушки из практики: PS ConvertTo-Json двойное экранирование, "
+        "csc.exe C# 5 ограничения, Telegram Bot API лимиты, GitHub upload endpoint."
+    ]},
+    {"tag": "p", "children": [
+        {"tag": "b", "children": ["vibe_coding.md"]},
+        " — концепция: говоришь на человеческом языке что хочешь увидеть, "
+        "Claude находит нужные параметры и меняет, ты смотришь результат. "
+        "Шаблон-заготовка для любого проекта с настраиваемым выходом."
+    ]},
+    {"tag": "hr"},
+
+    # ── 4. MEMORY.md ──────────────────────────────────────────────
+    {"tag": "h3", "children": ["MEMORY.md — долговременная память"]},
+    {"tag": "p", "children": [
+        "Claude Code не запоминает ничего между сессиями. MEMORY.md — решение: "
+        "файл читается в начале каждой сессии и активирует контекст."
+    ]},
+    {"tag": "p", "children": [
+        "Живёт в ", {"tag": "code", "children": ["~/.claude/memory/MEMORY.md"]},
+        ". Копия в каждом проекте: ", {"tag": "code", "children": [".claude/universal-memory.md"]}, "."
+    ]},
+    {"tag": "pre", "children": [
+        "Что пишется в MEMORY.md:\n"
+        "  ✓  уникальные паттерны и характер пользователя\n"
+        "  ✓  долгосрочные факты из практики: решения, поломки, инсайты\n"
+        "  ✓  новые мемы и локальные отсылки\n"
+        "  ✗  стиль/тон → это в communication.md\n"
+        "  ✗  workflow/деплой → это в CLAUDE.md\n"
+        "  ✗  дубли того что уже есть где-то ещё"
+    ]},
+    {"tag": "p", "children": [
+        "Claude сам ведёт MEMORY.md во время работы — дописывает новые паттерны, "
+        "исправляет устаревшие. Первые строки всегда в контексте, дальше — по необходимости."
+    ]},
+    {"tag": "hr"},
+
+    # ── 5. hookify ────────────────────────────────────────────────
+    {"tag": "h3", "children": ["hookify — система хуков"]},
+    {"tag": "p", "children": [
+        "Плагин hookify добавляет точки перехвата до/после действий Claude. "
+        "Правила в файлах ", {"tag": "code", "children": [".claude/hookify.*.local.md"]},
+        " в папке проекта."
+    ]},
+    {"tag": "pre", "children": [
+        "4 типа событий:\n"
+        "  UserPromptSubmit → при получении сообщения от пользователя\n"
+        "  PreToolUse       → перед вызовом инструмента (Edit, Bash, Write...)\n"
+        "  PostToolUse      → после вызова инструмента\n"
+        "  Stop             → перед завершением ответа"
+    ]},
+    {"tag": "p", "children": ["Каждое правило — отдельный md-файл с YAML-шапкой:"]},
+    {"tag": "pre", "children": [
+        "---\n"
+        "name:         no-rm-rf\n"
+        "enabled:      true\n"
+        "event:        bash          # bash или file\n"
+        "action:       block         # block или warn\n"
+        "pattern:      rm\\s+(-rf|-fr)  # regex для bash\n"
+        "---\n"
+        "⛔ rm -rf — необратимое удаление. Заблокировано."
+    ]},
+    {"tag": "p", "children": ["Текущие глобальные правила:"]},
+    {"tag": "pre", "children": [
+        "BLOCK — запрещено без исключений:\n"
+        "  rm -rf / rm -fr            необратимое удаление файлов\n"
+        "  git push --force main      затирание истории на main/master\n"
+        "  редактирование logo/       ассеты заморожены\n"
+        "  редактирование assets/     ассеты заморожены\n"
+        "\n"
+        "WARN — требует осознанного решения:\n"
+        "  --no-verify                скип pre-commit хуков\n"
+        "  git reset --hard           деструктивная git-операция\n"
+        "  git checkout -- .          деструктивная git-операция\n"
+        "  git restore .              деструктивная git-операция\n"
+        "  git clean -f               деструктивная git-операция\n"
+        "  CI / infra / *.yml         изменения требуют подтверждения"
+    ]},
+    {"tag": "p", "children": [
+        "Шаблоны для новых проектов — ",
+        {"tag": "code", "children": ["templates/hookify/"]},
+        " (6 файлов, скопировать в ", {"tag": "code", "children": [".claude/"]},
+        " нового проекта). К глобальным правилам добавляются проектно-специфичные — "
+        "например запрет менять конкретную функцию в конкретном файле."
+    ]},
+    {"tag": "hr"},
+
+    # ── 6. Проектный CLAUDE.md ────────────────────────────────────
+    {"tag": "h3", "children": ["Проектный CLAUDE.md — контекст репо"]},
+    {"tag": "p", "children": [
+        "Помимо глобального, в каждом репозитории есть свой CLAUDE.md. "
+        "Добавляет специфику: архитектуру, активные файлы, что нельзя трогать, команды деплоя."
+    ]},
+    {"tag": "pre", "children": [
+        "Типичное содержимое:\n"
+        "  ├── что за проект (1-2 строки)\n"
+        "  ├── активный файл / точка входа\n"
+        "  ├── критические правила (что ЗАПРЕЩЕНО)\n"
+        "  ├── команда деплоя одной строкой\n"
+        "  ├── команды отката (prev / backup)\n"
+        "  └── метафоры проекта"
+    ]},
+    {"tag": "p", "children": [
+        "Дополнительно — проектные правила в ", {"tag": "code", "children": [".claude/rules/"]},
+        ": тот же принцип что глобальные модули, только специфика одного репо. "
+        "Плюс проектные hookify-правила поверх глобальных."
+    ]},
+    {"tag": "hr"},
+
+    # ── 7. Telegraph ─────────────────────────────────────────────
+    {"tag": "h3", "children": ["Telegraph — этот лонгрид как часть системы"]},
+    {"tag": "p", "children": [
+        "Telegraph нужен для длинных публикаций с форматированием. "
+        "Telegram Bot API обрезает на 4096 символах, Telegraph — нет."
+    ]},
+    {"tag": "pre", "children": [
+        "Интеграция:\n"
+        "  settings.json                 → env.TELEGRAPH_TOKEN (доступен везде)\n"
+        "  ~/.claude/rules/telegraph.md  → правила публикации, API, шаблоны нод\n"
+        "  ~/.claude/update_telegraph.py → единый файл для обновления этого лонгрида"
+    ]},
+    {"tag": "p", "children": [
+        "Публикация только через Python (curl ломает кириллицу). "
+        "Для ", {"tag": "code", "children": ["editPage"]}, " — тот же подход."
+    ]},
+    {"tag": "p", "children": [
+        "Этот лонгрид обновляется через ", {"tag": "code", "children": ["update_telegraph.py"]},
+        " — один и тот же файл, всегда editPage. "
+        "Не пересоздаётся с новым именем, не копится пяток версий. "
+        "Только обновляется."
+    ]},
+    {"tag": "hr"},
+
+    # ── Итог ─────────────────────────────────────────────────────
+    {"tag": "h3", "children": ["Итог — компоненты системы"]},
+    {"tag": "pre", "children": [
+        "Компонент              Файл                           Что делает\n"
+        "────────────────────────────────────────────────────────────────────\n"
+        "Фундамент              settings.json                  разрешения, плагины, токены\n"
+        "Мозг сессии            ~/.claude/CLAUDE.md            алгоритм, принципы, маршрутизатор\n"
+        "Стиль / тон            rules/communication.md         как разговаривать\n"
+        "Память                 memory/MEMORY.md               факты между сессиями\n"
+        "GitHub без gh CLI      rules/github_ops.md            API через PowerShell\n"
+        "GitHub оформление      rules/github_formatting.md     README, бейджи, чеклист\n"
+        "Telegram посты         rules/lessons_universal.md     TG-лимиты, Bot API\n"
+        "Telegraph публикации   rules/telegraph.md             лонгриды, editPage\n"
+        "Windows / C# / PS      rules/windows_dev.md           installer, WinForms\n"
+        "Вайбкодинг             rules/vibe_coding.md           человеческий язык → параметры\n"
+        "Ловушки / антипат.     rules/lessons_universal.md     баги из практики\n"
+        "Enforcement            hookify.*.local.md             block/warn хуки\n"
+        "Проектный контекст     .claude/CLAUDE.md              специфика репо"
+    ]},
+    {"tag": "p", "children": [
+        "Всё это — не разовая настройка. Живая система: каждая сессия дополняет правила, "
+        "каждая поломка уходит в ", {"tag": "code", "children": ["lessons.md"]},
+        ", каждый паттерн — в MEMORY.md."
+    ]},
+]
+
+data = json.dumps({
+    "access_token": TOKEN,
+    "path": PATH,
+    "title": "Как я кастомизирую Claude: правила, память и модули",
+    "author_name": "Potap",
+    "author_url": "https://t.me/potap_attic",
+    "content": content,
+    "return_content": False
+}).encode("utf-8")
+
+req = urllib.request.Request(
+    "https://api.telegra.ph/editPage/" + PATH,
+    data=data,
+    headers={"Content-Type": "application/json"}
+)
+result = json.loads(urllib.request.urlopen(req).read())
+print(result["result"]["url"])
