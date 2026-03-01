@@ -34,11 +34,12 @@ content = [
 
     # ── Оглавление ───────────────────────────────────────────────
     {"tag": "pre", "children": [
-        "├─ settings.json ─────── фундамент, разрешения, токены\n"
+        "├─ settings.json ─────── фундамент, разрешения, deny, MCP, хуки\n"
         "├─ CLAUDE.md ─────────── алгоритм сессии, маршрутизатор\n"
         "├─ MEMORY.md ─────────── долговременная память\n"
-        "├─ hookify ───────────── block/warn хуки\n"
+        "├─ hookify ───────────── block/warn хуки (проектный уровень)\n"
         "├─ rules/ ────────────── 8 модульных md-правил\n"
+        "├─ agents/ ───────────── кастомные субагенты\n"
         "├─ Проектный CLAUDE.md ─ контекст репо\n"
         "└─ GitHub + Telegraph ── инфраструктура автообновления"
     ]},
@@ -54,21 +55,33 @@ content = [
         "settings.json\n"
         "├── permissions\n"
         "│   ├── allow       → [Bash(*), Edit(*), Write(*), Read(*), WebSearch, WebFetch(*)]\n"
-        "│   └── defaultMode → dontAsk  (работает автономно, не спрашивает каждый раз)\n"
+        "│   ├── deny        → [~/.ssh/**, ~/.aws/**, ~/.gnupg/**, ~/.kube/**, ~/.npmrc, ...]\n"
+        "│   └── defaultMode → dontAsk  (работает автономно)\n"
+        "├── alwaysThinkingEnabled → true  (extended thinking по умолчанию)\n"
+        "├── mcpServers      → {context7}  (живая документация библиотек)\n"
+        "├── hooks           → {Stop: anti-rationalization}  (блокирует отмазки)\n"
         "├── enabledPlugins  → [commit-commands, claude-md-management, hookify, github]\n"
-        "├── env             → {GITHUB_TOKEN, TELEGRAPH_TOKEN, TELEGRAM_BOT_TOKEN}\n"
-        "└── language        → Russian"
+        "└── env             → {GITHUB_TOKEN, TELEGRAPH_TOKEN, TELEGRAM_BOT_TOKEN}"
     ]},
     {"tag": "p", "children": [
-        {"tag": "b", "children": ["Главное"]}, " — ",
-        {"tag": "code", "children": ["defaultMode: dontAsk"]},
-        ". Claude не просит разрешения на каждый вызов инструмента. "
-        "Работает сам, только для критичных необратимых действий уточняет."
+        {"tag": "b", "children": ["deny"]},
+        " — Claude физически не может прочитать ~/.ssh, ~/.aws, ~/.gnupg и другие папки с секретами. "
+        "Не advisory-правило, а hardware block на уровне permissions."
+    ]},
+    {"tag": "p", "children": [
+        {"tag": "b", "children": ["context7"]},
+        " — MCP-сервер, инжектирует актуальную документацию библиотек прямо в контекст. "
+        "Решает галлюцинации по API — Claude видит реальные сигнатуры, а не придумывает их."
+    ]},
+    {"tag": "p", "children": [
+        {"tag": "b", "children": ["Stop hook / anti-rationalization"]},
+        " — каждый раз когда Claude заканчивает ответ, скрипт проверяет текст на отмазки: "
+        "«за рамками задачи», «нужно больше контекста», «баг существовал до меня». "
+        "Если нашёл — блокирует завершение и заставляет продолжать работу."
     ]},
     {"tag": "p", "children": [
         "Токены в ", {"tag": "code", "children": ["env"]},
-        " — Claude видит их как переменные окружения в любом проекте. "
-        "Не нужно вставлять в каждый скрипт вручную."
+        " — Claude видит их как переменные окружения в любом проекте."
     ]},
     {"tag": "hr"},
 
@@ -227,7 +240,27 @@ content = [
     ]},
     {"tag": "hr"},
 
-    # ── 6. Проектный CLAUDE.md ────────────────────────────────────
+    # ── 6. Subagents ──────────────────────────────────────────────
+    {"tag": "h3", "children": ["agents/ — кастомные субагенты"]},
+    {"tag": "p", "children": [
+        "Субагенты живут в ", {"tag": "code", "children": ["~/.claude/agents/"]},
+        " (глобально) или в ", {"tag": "code", "children": [".claude/agents/"]},
+        " (проектно). Каждый — md-файл с YAML-шапкой: модель, инструменты, системный промпт."
+    ]},
+    {"tag": "pre", "children": [
+        "~/.claude/agents/code-reviewer.md\n"
+        "  model:  claude-haiku  (дешевле, достаточно для ревью)\n"
+        "  tools:  Read, Glob, Grep  (только чтение — не может ничего сломать)\n"
+        "  prompt: ищи баги/секьюрити/антипаттерны, не придирайся к стилю\n"
+        "  output: 🔴 КРИТИЧНО / 🟡 ВНИМАНИЕ / 🟢 МЕЛОЧЬ"
+    ]},
+    {"tag": "p", "children": [
+        "Субагент изолирован — работает в отдельном контексте, не засоряет main context. "
+        "Haiku дешевле Sonnet в 10–20 раз, для code review этого хватает."
+    ]},
+    {"tag": "hr"},
+
+    # ── 7. Проектный CLAUDE.md ────────────────────────────────────
     {"tag": "h3", "children": ["Проектный CLAUDE.md — контекст репо"]},
     {"tag": "p", "children": [
         "Помимо глобального, в каждом репозитории есть свой CLAUDE.md. "
@@ -263,6 +296,8 @@ content = [
         "├── CLAUDE.md                  глобальный алгоритм сессии\n"
         "├── update_telegraph.py        скрипт обновления этого лонгрида\n"
         "├── rules/                     8 модульных md-файлов\n"
+        "├── agents/                    кастомные субагенты\n"
+        "│   └── code-reviewer.md       haiku, Read/Glob/Grep\n"
         "└── templates/\n"
         "    ├── CLAUDE_BASE.md  MEMORY_TEMPLATE.md  и др.\n"
         "    └── hookify/        6 шаблонов хуков"
@@ -283,21 +318,24 @@ content = [
     # ── Итог ─────────────────────────────────────────────────────
     {"tag": "h3", "children": ["Итог — компоненты системы"]},
     {"tag": "pre", "children": [
-        "Компонент              Файл                           Что делает\n"
-        "────────────────────────────────────────────────────────────────────\n"
-        "Фундамент              settings.json                  разрешения, плагины, токены\n"
-        "Мозг сессии            ~/.claude/CLAUDE.md            алгоритм, принципы, маршрутизатор\n"
-        "Память                 memory/MEMORY.md               факты между сессиями\n"
-        "Enforcement            hookify.*.local.md             block/warn хуки\n"
-        "Стиль / тон            rules/communication.md         как разговаривать\n"
-        "GitHub без gh CLI      rules/github_ops.md            API через PowerShell\n"
-        "GitHub оформление      rules/github_formatting.md     README, бейджи, чеклист\n"
-        "Telegram посты         rules/lessons_universal.md     TG-лимиты, Bot API\n"
-        "Telegraph публикации   rules/telegraph.md             лонгриды, editPage\n"
-        "Windows / C# / PS      rules/windows_dev.md           installer, WinForms\n"
-        "Вайбкодинг             rules/vibe_coding.md           человеческий язык → параметры\n"
-        "Ловушки / антипат.     rules/lessons_universal.md     баги из практики\n"
-        "Проектный контекст     .claude/CLAUDE.md              специфика репо"
+        "Компонент              Файл                             Что делает\n"
+        "──────────────────────────────────────────────────────────────────────\n"
+        "Фундамент              settings.json                    разрешения, deny, MCP, хуки\n"
+        "Мозг сессии            ~/.claude/CLAUDE.md              алгоритм, принципы, маршрутизатор\n"
+        "Память                 memory/MEMORY.md                 факты между сессиями\n"
+        "Безопасность           deny rules + Stop hook           кредсы недоступны, отмазки блокируются\n"
+        "Живая документация     mcpServers.context7              актуальные API без галлюцинаций\n"
+        "Ревью кода             agents/code-reviewer.md          haiku, только чтение, быстро\n"
+        "Enforcement            hookify.*.local.md               block/warn хуки\n"
+        "Стиль / тон            rules/communication.md           как разговаривать\n"
+        "GitHub без gh CLI      rules/github_ops.md              API через PowerShell\n"
+        "GitHub оформление      rules/github_formatting.md       README, бейджи, чеклист\n"
+        "Telegram посты         rules/lessons_universal.md       TG-лимиты, Bot API\n"
+        "Telegraph публикации   rules/telegraph.md               лонгриды, editPage\n"
+        "Windows / C# / PS      rules/windows_dev.md             installer, WinForms\n"
+        "Вайбкодинг             rules/vibe_coding.md             человеческий язык → параметры\n"
+        "Ловушки / антипат.     rules/lessons_universal.md       баги из практики\n"
+        "Проектный контекст     .claude/CLAUDE.md                специфика репо"
     ]},
     {"tag": "p", "children": [
         "Всё это — не разовая настройка. Живая система: каждая сессия дополняет правила, "
@@ -350,6 +388,16 @@ def _sync_github():
     if os.path.isdir(hk):
         for f in os.listdir(hk):
             shutil.copy(os.path.join(hk, f), os.path.join(REPO, "templates", "hookify", f))
+
+    # ── Субагенты ─────────────────────────────────────────────────
+    agents_src = os.path.join(_CLAUDE, "agents")
+    agents_dst = os.path.join(REPO, "agents")
+    if os.path.isdir(agents_src):
+        os.makedirs(agents_dst, exist_ok=True)
+        for f in os.listdir(agents_src):
+            p = os.path.join(agents_src, f)
+            if os.path.isfile(p):
+                shutil.copy(p, os.path.join(agents_dst, f))
 
     # ── Pre-push аудит токенов ────────────────────────────────────
     _REAL_TOKEN_RE = re.compile(
