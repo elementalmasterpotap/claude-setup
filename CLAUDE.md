@@ -64,6 +64,13 @@ Enforcement через hookify: `logo/` `assets/` → block · `CI/` `infra/` `*
 ## Commits
 `type(scope): description` · feat/fix/refactor/docs/style/chore · не амендить опубликованные
 
+## Pre-push аудит (ОБЯЗАТЕЛЬНО перед любым git push)
+```
+grep -rn "ghp_[A-Za-z0-9]\{36\}\|[0-9]\{10\}:AA[A-Za-z0-9_-]\{33\}\|475c06[a-f0-9]\{50\}\|edit\.telegra\.ph/auth" \
+  . --include="*.py" --include="*.md" --include="*.json" --include="*.ps1" | grep -v ".git/"
+```
+Плейсхолдеры (XXXX, your_token, $TOKEN) — ок. Реальные значения — СТОП, не пушить.
+
 ## Принципы
 Минимальный импакт · root cause не симптом · трогать только нужное · не хакать · не дублировать
 Нетривиальная правка → спросить себя "есть более элегантный путь?" перед отправкой · объяснять изменения кратко на каждом шаге
