@@ -136,10 +136,13 @@ try:
     if eligible:
         hint = (
             f"[HAIKU_ELIGIBLE: h={h_score} s={s_score}] "
-            "Эта задача выглядит как read-only анализ без правок кода. "
+            "Эта задача — read-only анализ без правок кода. "
             "Используй Task(subagent_type='codebase-explorer') — Haiku субагент. "
             "Перед вызовом напиши в ответе: [→ Haiku] <что делаю>. "
-            "Это правило из haiku-router skill."
+            "ВАЖНО ДЛЯ ЭКОНОМИИ ТОКЕНОВ: "
+            "1) НЕ используй extended thinking для этой задачи — она простая, прямой ответ без <parameter name="thinking"> блока. "
+            "2) Verbose результат оставь в субагенте, в главный контекст верни только summary. "
+            "3) Правило из haiku-router skill."
         )
         print(json.dumps({"injectedSystemPrompt": hint}, ensure_ascii=False))
 
