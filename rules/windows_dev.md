@@ -2,6 +2,22 @@
 
 ---
 
+## settings.json — читать/писать только через Python
+
+**Проблема:** `Edit(settings.json)` → "File has not been read yet" даже после чтения.
+`cat ~/.claude/settings.json | python3 -c "..."` → путь `/c/Users/...` не раскрывается в Windows.
+**Решение:** всегда `os.path.expanduser('~/.claude/settings.json')` через Python-heredoc:
+```python
+import json, os
+path = os.path.expanduser('~/.claude/settings.json')
+with open(path) as f: data = json.load(f)
+# ... изменения ...
+with open(path, 'w') as f: json.dump(data, f, indent=2, ensure_ascii=False)
+```
+**Правило:** settings.json — только Python, никогда Edit/cat/pipe.
+
+---
+
 ## PowerShell installer — структура
 
 Проверенный паттерн установщика с псевдо-GUI, RU/EN, backup+manifest, -NoPrompt.

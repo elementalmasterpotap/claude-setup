@@ -107,3 +107,21 @@ Invoke-RestMethod "https://api.telegram.org/bot$botToken/sendPhoto" -Method POST
 
 ### U-4 — Не менять сигнатуры функций без обновления всех вызовов
 Один несинхронизированный вызов → ошибка компиляции/runtime → всё перестаёт работать. Проще добавить параметр по умолчанию или передавать через closure/глобальную переменную.
+
+---
+
+## Claude Code Хуки
+
+### HK-1 — Stop хуки читают `last_assistant_message`, не `transcript`
+**Проблема:** тестирование с `{"transcript":[{"role":"assistant","content":"..."}]}` → хук молчит, кажется что не работает.
+**Причина:** Stop хуки получают плоский JSON с полем `last_assistant_message` (строка), не вложенный массив транскрипта.
+**Правильная структура для теста:**
+```bash
+echo '{"stop_hook_active":false,"last_assistant_message":"текст ответа"}' | python3 hook.py
+```
+**Правило:** при написании/тестировании Stop хука всегда использовать `last_assistant_message`.
+
+### HK-2 — `claude plugin list` зависает без TTY
+**Проблема:** `claude plugin list 2>&1` в скрипте/хуке → виснет, ничего не возвращает.
+**Причина:** команда ждёт интерактивного TTY.
+**Решение:** в скриптах читать `enabledPlugins` из settings.json напрямую, не через CLI.

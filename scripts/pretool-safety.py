@@ -66,6 +66,18 @@ try:
             }, ensure_ascii=False))
             sys.exit(0)
 
+        # claude plugin list зависает без TTY (HK-2)
+        if re.search(r'claude\s+plugin\s+list', cmd):
+            print(json.dumps({
+                "decision": "block",
+                "reason": (
+                    "⚠️ claude plugin list зависает без TTY.\n"
+                    "Используй enabledPlugins из settings.json:\n"
+                    "  python3 -c \"import json,os; d=json.load(open(os.path.expanduser('~/.claude/settings.json'))); print(list(d.get('enabledPlugins',{}).keys()))\""
+                )
+            }, ensure_ascii=False))
+            sys.exit(0)
+
     # ── Edit / Write → logo/ assets/ ────────────────────────────────
     if tool in ('Edit', 'Write', 'Read'):
         path = inp.get('file_path', '') or ''
