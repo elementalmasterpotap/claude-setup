@@ -23,6 +23,7 @@
   ├── PS installer / WinForms тёмная тема ──► windows_dev.md
   ├── новый проект (старт с нуля) ──► templates/CLAUDE_BASE.md + templates/MEMORY_TEMPLATE.md
   ├── правило / память        ──► CLAUDE.md "Новые записи" ──► проверить дубли
+  ├── токены / Pro лимит / compact ──► token-budget.md
   └── структура / цвет        ──► preferences.md
 
   3+ шагов или архит. решение? ──► Plan mode (включая верификацию, не только построение)

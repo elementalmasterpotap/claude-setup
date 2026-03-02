@@ -140,7 +140,7 @@ try:
             "Используй Task(subagent_type='codebase-explorer') — Haiku субагент. "
             "Перед вызовом напиши в ответе: [→ Haiku] <что делаю>. "
             "ВАЖНО ДЛЯ ЭКОНОМИИ ТОКЕНОВ: "
-            "1) НЕ используй extended thinking для этой задачи — она простая, прямой ответ без <parameter name="thinking"> блока. "
+            "1) НЕ используй extended thinking для этой задачи — она простая, прямой ответ без thinking-блока. "
             "2) Verbose результат оставь в субагенте, в главный контекст верни только summary. "
             "3) Правило из haiku-router skill."
         )
