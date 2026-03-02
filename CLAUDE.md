@@ -22,6 +22,7 @@
   ├── C# / PowerShell / Windows ──► lessons_universal.md (PS-1..PS-3, CS-1..CS-3)
   ├── PS installer / WinForms тёмная тема ──► windows_dev.md
   ├── новый проект (старт с нуля) ──► templates/CLAUDE_BASE.md + templates/MEMORY_TEMPLATE.md
+  ├── новый веб-сайт / HTML-страница ──► html+css+js сразу, не монолит (preferences.md §Разбивка)
   ├── правило / память        ──► CLAUDE.md "Новые записи" ──► проверить дубли
   ├── токены / Pro лимит / compact ──► token-budget.md
   └── структура / цвет        ──► preferences.md
