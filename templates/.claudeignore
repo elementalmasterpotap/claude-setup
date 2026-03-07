@@ -1,0 +1,49 @@
+# .claudeignore — шаблон для нового проекта
+# Дополняет глобальный ~/.claude/.claudeignore
+# Удали неподходящее, добавь специфику проекта.
+#
+# Правило: исключай всё что Claude не должен читать автоматически.
+# package-lock.json = 30-80K токенов, node_modules = сотни тысяч.
+
+# ── Специфика проекта (раскомментируй нужное) ────────────────────────────────
+
+# C# / .NET
+# obj/
+# bin/
+# *.user
+# *.suo
+# .vs/
+# *.nupkg
+
+# Rust
+# target/
+# Cargo.lock   ← оставь если это приложение (не либа)
+
+# Go
+# vendor/
+
+# Docker
+# .docker/
+
+# Terraform
+# .terraform/
+# *.tfstate
+# *.tfstate.backup
+
+# Большие датасеты / ML
+# data/
+# datasets/
+# *.csv
+# *.parquet
+# *.pkl
+# models/
+# checkpoints/
+
+# Проектные бэкапы
+# docs/*.prev.*
+# docs/*.backup.*
+
+# Claude локальное (не пушить)
+.claude/settings.local.json
+.claude/universal-rules.md
+.claude/universal-memory.md
