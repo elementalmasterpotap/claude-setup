@@ -116,7 +116,7 @@ def _sync_github():
         raise RuntimeError("⛔ SECRET LEAK — git push отменён:\n" + "\n".join(leaks))
 
     # Git commit + push
-    token = os.environ.get("GITHUB_PERSONAL_ACCESS_TOKEN", "")
+    token = os.environ.get("GITHUB_TOKEN", "")
     repo_url = f"https://{token}@github.com/elementalmasterpotap/potap-claude-setup.git"
     clean_url = "https://github.com/elementalmasterpotap/potap-claude-setup.git"
 
@@ -138,10 +138,10 @@ except Exception as e:
     print(f"GitHub sync failed: {e}", file=sys.stderr)
 
 # ── Telegram preview refresh ──────────────────────────────────────────────────
-TG_BOT       = os.environ.get("TELEGRAM_BOT_TOKEN")
+TG_BOT       = os.environ.get("TG_BOT_TOKEN")
 TG_CHAT      = "@potap_attic"
 TG_POST_FILE = os.path.join(_CLAUDE, ".tg_post_id")
-LONGREAD_URL = "https://telegra.ph/Kak-ya-kastomiziruyu-Claude-pravila-pamyat-i-moduli-03-01"
+LONGREAD_URL = "https://telegra.ph/Kak-ya-kastomiziruyu-Claude--pravila-pamyat-i-moduli-03-07"
 TG_TEXT = (
     "🗂 <b>potap-claude-setup — моя настройка Claude Code на GitHub</b>\n\n"
     "Выложил весь стек кастомизаций: правила, шаблоны, hookify-хуки, "
